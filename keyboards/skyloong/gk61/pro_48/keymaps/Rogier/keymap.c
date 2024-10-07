@@ -49,10 +49,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______,  _______,  _______,            _______,  _______,     _______,            _______,  _______,  _______,  _______,            _______
 ),
 
-
 [2] = LAYOUT_all(
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-    _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, _______, _______, _______, _______, _______, _______, _______,
+    _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, _______, _______, _______, _______, _______, _______, QK_BOOT,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
     _______, _______, _______,          _______, _______, _______,          _______, _______, _______, _______,            _______
@@ -62,7 +61,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [0] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [1] = { ENCODER_CCW_CW(RGB_HUD, RGB_HUI) }
+    [1] = { ENCODER_CCW_CW(RGB_HUD, RGB_HUI) },
+    [2] = { ENCODER_CCW_CW(RGB_HUD, RGB_HUI) }
 };
 #endif
 
@@ -88,11 +88,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-// Function gets called every tick of the lighting engine
+// Function gets called every tick of the lighting engine 
+// Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
     if (timer_elapsed(esc_timer) > 10 && esc_brightness > 0) { // Check if 10ms have passed and brightness is greater than 0
         esc_brightness--; // Decrease brightness
-        set_rgb_brightness(0, RGB_RED, esc_brightness); // Update ESC key color with new brightness
         esc_timer = timer_read(); // Reset the timer
     }
+
+    if (esc_brightness > 0) {
+       set_rgb_brightness(0, RGB_RED, esc_brightness); // Update ESC key color with new brightness
+    }  
+
+        // Check if layer 1 is active
+    if (layer_state_is(1)) {
+        // Set arrow keys to red
+        set_rgb_brightness(34, RGB_TEAL, 255); // Left arrow key
+        set_rgb_brightness(35, RGB_TEAL, 255); // Down arrow key
+        set_rgb_brightness(36, RGB_TEAL, 255); // Up arrow key
+        set_rgb_brightness(37, RGB_TEAL, 255); // Right arrow key
+    }
 }
+
+
