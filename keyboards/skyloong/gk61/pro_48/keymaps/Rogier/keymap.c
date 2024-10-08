@@ -6,6 +6,27 @@
 
 #include QMK_KEYBOARD_H
 
+
+enum custom_keycodes {
+    KC_MY_BACK = SAFE_RANGE,
+    KC_MY_FORWARD
+};
+
+// LED indexes
+/*
+ *     ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+ *     │ 0 │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │10 │11 │12 │13 │
+ *     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+ *     │14 │15 │16 │17 │18 │19 │20 │21 │22 │23 │24 │25 │26 │27 │
+ *     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+ *     │28 │29 │30 │31 │32 │33 │34 │35 │36 │37 │38 │39 │   │40 │
+ *     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+ *     │41 │42 │43 │44 │45 │46 │47 │48 │49 │50 │51 │   │52 │   │
+ *     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+ *     │53 │54 │55 │   │56 │57 │   │   │58 │59 │60 │61 │   │62 │
+ *     └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+ */
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
      * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
@@ -23,9 +44,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_all(
          KC_ESC,     KC_1,     KC_2,     KC_3,     KC_4,     KC_5,        KC_6,     KC_7,       KC_8,     KC_9,        KC_0,     KC_MINS,   KC_EQL,   KC_BSPC,
          KC_TAB,     KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,        KC_Y,     KC_U,       KC_I,     KC_O,        KC_P,     KC_LBRC,  KC_RBRC,   KC_BSLS,
-        KC_CAPS,     KC_A,     KC_S,     KC_D,     KC_F,     KC_G,        KC_H,     KC_J,       KC_K,     KC_L,     KC_SCLN,     KC_QUOT,              KC_ENT,
+        KC_LCTL,     KC_A,     KC_S,     KC_D,     KC_F,     KC_G,        KC_H,     KC_J,       KC_K,     KC_L,     KC_SCLN,     KC_QUOT,              KC_ENT,
         KC_LSFT,     KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,        KC_N,     KC_M,    KC_COMM,   KC_DOT,     KC_SLSH,               KC_RSFT,
-        KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),  KC_RALT,      KC_APP,     KC_RCTL,               MO(2)
+        KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),  KC_RALT,      LGUI(KC_LEFT),   LGUI(KC_RIGHT),     MO(2)
     ),
 
    /*
@@ -42,15 +63,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
      */
 [1] = LAYOUT_all(
-    KC_GRV,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
+    _______,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
     _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-    _______,  _______,  _______,  _______,  _______,  _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  _______,            _______,
-    _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  _______,  _______,  _______,            _______,
+    _______,  _______,  _______,  _______,  _______,  _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
+    _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
     _______,  _______,  _______,            _______,  _______,     _______,            _______,  _______,  _______,  _______,            _______
 ),
 
 [2] = LAYOUT_all(
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_VAD, RGB_VAI, _______,
     _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, _______, _______, _______, _______, _______, _______, QK_BOOT,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
@@ -66,8 +87,22 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
-static uint16_t esc_timer = 0;
-static uint8_t esc_brightness = 255; // Maximum brightness
+
+// void encoder_update_user(uint8_t index, bool clockwise) {
+//     if (layer_state_is(2)) {
+//         if (clockwise) {
+//             rgb_matrix_increase_hue();
+//         } else {
+//             rgb_matrix_decrease_hue();
+//         }
+//     } else {
+//         if (clockwise) {
+//              tap_code(LCA(KC_LEFT));
+//         } else {
+//             tap_code(LCA(KC_RIGHT));
+//         }
+//     }
+// }
 
 // Function to scale RGB values based on brightness
 void set_rgb_brightness(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
@@ -77,37 +112,37 @@ void set_rgb_brightness(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t 
     rgb_matrix_set_color(index, scaled_r, scaled_g, scaled_b);
 }
 
-// Function gets called every time a key is pressed or released
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (record->event.pressed) {
-        // Light up the ESC key when any key is pressed
-        set_rgb_brightness(0, RGB_RED, esc_brightness); // Set ESC key (index 0) to RGB_RED with current brightness
-        esc_timer = timer_read(); // Start the timer to fade out the esc key
-        esc_brightness = 255; // Reset brightness to maximum
-    }
-    return true;
-}
+
 
 // Function gets called every tick of the lighting engine 
 // Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
-    if (timer_elapsed(esc_timer) > 10 && esc_brightness > 0) { // Check if 10ms have passed and brightness is greater than 0
-        esc_brightness--; // Decrease brightness
-        esc_timer = timer_read(); // Reset the timer
-    }
-
-    if (esc_brightness > 0) {
-       set_rgb_brightness(0, RGB_RED, esc_brightness); // Update ESC key color with new brightness
-    }  
 
         // Check if layer 1 is active
     if (layer_state_is(1)) {
         // Set arrow keys to red
-        set_rgb_brightness(34, RGB_TEAL, 255); // Left arrow key
-        set_rgb_brightness(35, RGB_TEAL, 255); // Down arrow key
-        set_rgb_brightness(36, RGB_TEAL, 255); // Up arrow key
-        set_rgb_brightness(37, RGB_TEAL, 255); // Right arrow key
+        rgb_matrix_set_color(34, 0, 255, 110 ); // Left arrow key
+        rgb_matrix_set_color(35, 0, 255, 110 ); // Down arrow key
+        rgb_matrix_set_color(36, 0, 255, 110 ); // Up arrow key
+        rgb_matrix_set_color(37, 0, 255, 110 ); // Right arrow key
+
+        rgb_matrix_set_color(39, 255, 0, 255 ); // Grv key
+
+        rgb_matrix_set_color(13, 255, 102, 0 ); // Del key
+
+        rgb_matrix_set_color(49, RGB_YELLOW ); // Del key
+        rgb_matrix_set_color(50, RGB_YELLOW ); // Del key
+
+        // color all the f keys gold
+        for (int i = 1; i < 13; i++) {
+            rgb_matrix_set_color(i, 0, 128, 255 );
+        }
     }
+
+     if (layer_state_is(2)) {
+        rgb_matrix_set_color(11, 140, 140, 140 ); // minus key
+        rgb_matrix_set_color(12, 255, 255, 255 ); // plus key
+     }
 }
 
 
