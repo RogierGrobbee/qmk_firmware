@@ -87,6 +87,11 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
+// Global variable to keep track of the current LED position
+static bool effect_enabled = true;
+static uint8_t current_led_position = 1;
+static uint32_t last_keypress_time = 0;
+#define LED_TIMEOUT 6000 // 6 seconds in milliseconds
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -96,6 +101,38 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 rgb_matrix_sethsv(0, 255, 255); // Hue 0 is red
             }
             return false;
+    }
+    if (record->event.pressed) {
+        if (keycode == KC_C && layer_state_is(2)) {
+            effect_enabled = !effect_enabled;
+            return false;
+        }
+
+        // Check if the key is an alpha key, symbol, or space
+        if (((keycode >= KC_A && keycode <= KC_Z) || 
+            (keycode >= KC_1 && keycode <= KC_0) || 
+            (keycode >= KC_EXLM && keycode <= KC_SLSH) || 
+            keycode == KC_SPACE || 
+            keycode == KC_BSPC)  &&
+            !(get_mods() & (MOD_MASK_CTRL | MOD_MASK_SHIFT | MOD_MASK_ALT | MOD_MASK_GUI))) {
+            
+            if (keycode == KC_BSPC) {
+                // Move the LED position backwards
+                if (current_led_position == 1) {
+                    // do nothing
+                } else {
+                    current_led_position--;
+                }
+            } else {
+                // Increment the LED position
+                current_led_position++;
+                if (current_led_position > 12) {
+                    current_led_position = 1;
+                }
+                last_keypress_time = timer_read();
+            }
+            
+        }
     }
     return true;
 }
@@ -137,12 +174,21 @@ void set_rgb_brightness(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t 
 }
 
 
-
 // Function gets called every tick of the lighting engine 
 // Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
 
-        // Check if layer 1 is active
+    if (effect_enabled) {
+        // Typing cursor lighting effect
+        if (timer_elapsed(last_keypress_time) < LED_TIMEOUT) {
+            rgb_matrix_set_color(current_led_position, 255, 255, 255);
+        }
+        else {
+            current_led_position = 1;
+        }
+    }
+
+    // Check if layer 1 is active
     if (layer_state_is(1)) {
         // Set arrow keys to red
         rgb_matrix_set_color(34, 0, 255, 110 ); // Left arrow key
@@ -168,8 +214,20 @@ void matrix_scan_user(void) {
     }
 
      if (layer_state_is(2)) {
+        rgb_matrix_set_color(16, 0, 0, 0 ); // overwrite W key to off
+
+
         rgb_matrix_set_color(11, 140, 140, 140 ); // minus key
         rgb_matrix_set_color(12, 255, 255, 255 ); // plus key
+
+        // Typing cursor effect enabled indicator
+        if (effect_enabled) {
+            rgb_matrix_set_color(44, 0, 255, 0 ); // Green
+        } else {
+            rgb_matrix_set_color(44, 255, 0, 0 ); // Red
+        }
+
+
      }
 }
 
