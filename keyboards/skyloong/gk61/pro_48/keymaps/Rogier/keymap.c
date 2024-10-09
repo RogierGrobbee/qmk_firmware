@@ -8,7 +8,7 @@
 
 
 enum custom_keycodes {
-    KC_MY_BACK = SAFE_RANGE,
+    HUE_RED = SAFE_RANGE,
     KC_MY_FORWARD
 };
 
@@ -65,13 +65,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [1] = LAYOUT_all(
     _______,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
     _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-    _______,  _______,  _______,  _______,  _______,  _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
+    _______,  _______,  _______,  KC_HOME,  KC_END,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
     _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
     _______,  _______,  _______,            _______,  _______,     _______,            _______,  _______,  _______,  _______,            _______
 ),
 
 [2] = LAYOUT_all(
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_VAD, RGB_VAI, _______,
+    _______, HUE_RED, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_VAD, RGB_VAI, _______,
     _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, _______, _______, _______, _______, _______, _______, QK_BOOT,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
@@ -88,21 +88,45 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 
-// void encoder_update_user(uint8_t index, bool clockwise) {
-//     if (layer_state_is(2)) {
-//         if (clockwise) {
-//             rgb_matrix_increase_hue();
-//         } else {
-//             rgb_matrix_decrease_hue();
-//         }
-//     } else {
-//         if (clockwise) {
-//              tap_code(LCA(KC_LEFT));
-//         } else {
-//             tap_code(LCA(KC_RIGHT));
-//         }
-//     }
-// }
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case HUE_RED:
+            if (record->event.pressed) {
+                // Set matrix hue to red
+                rgb_matrix_sethsv(0, 255, 255); // Hue 0 is red
+            }
+            return false;
+    }
+    return true;
+}
+
+uint8_t get_current_hue(void) {
+    HSV hsv = rgb_matrix_get_hsv();
+    return hsv.h;
+}
+
+void set_hue(uint8_t hue) {
+    rgb_matrix_sethsv(hue, 255, 255);
+}
+   
+bool encoder_update_user(uint8_t index, bool clockwise) {
+    if (layer_state_is(2)) {
+        uint8_t current_hue = get_current_hue();
+        if (clockwise) {
+            current_hue = (current_hue + 1) % 256; // Increment hue, wrap around at 256
+        } else {
+            current_hue = (current_hue - 1 + 256) % 256; // Decrement hue, wrap around at 0
+        }
+        set_hue(current_hue);
+    } else {
+        if (clockwise) {
+            tap_code16(C(A(KC_LEFT)));
+        } else {
+            tap_code16(C(A(KC_RIGHT)));
+        }
+    }
+    return false;
+}
 
 // Function to scale RGB values based on brightness
 void set_rgb_brightness(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
@@ -126,12 +150,16 @@ void matrix_scan_user(void) {
         rgb_matrix_set_color(36, 0, 255, 110 ); // Up arrow key
         rgb_matrix_set_color(37, 0, 255, 110 ); // Right arrow key
 
+        // Color Home and End keys
+        rgb_matrix_set_color(31, 255, 0, 0 ); 
+        rgb_matrix_set_color(32, 255, 0, 0  ); 
+
         rgb_matrix_set_color(39, 255, 0, 255 ); // Grv key
 
-        rgb_matrix_set_color(13, 255, 102, 0 ); // Del key
+        rgb_matrix_set_color(13, 255, 77, 0 ); // Del key
 
-        rgb_matrix_set_color(49, RGB_YELLOW ); // Del key
-        rgb_matrix_set_color(50, RGB_YELLOW ); // Del key
+        rgb_matrix_set_color(49, 255, 255, 0 ); // Desktop Left key
+        rgb_matrix_set_color(50, 255, 255, 0 ); // Desktop Right key
 
         // color all the f keys gold
         for (int i = 1; i < 13; i++) {
