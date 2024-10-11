@@ -8,8 +8,16 @@
 
 
 enum custom_keycodes {
-    HUE_RED = SAFE_RANGE,
-    KC_MY_FORWARD
+    HUE_1 = SAFE_RANGE,
+    HUE_2,
+    HUE_3,
+    HUE_4,
+    HUE_5,
+    HUE_6,
+    HUE_7,
+    HUE_8,
+    HUE_9,
+    HUE_10,
 };
 
 // LED indexes
@@ -49,29 +57,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),  KC_RALT,      LGUI(KC_LEFT),   LGUI(KC_RIGHT),     MO(2)
     ),
 
-   /*
-     * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
-     * │ ` │F1 │F2 │F3 │F4 │F5 │F6 │F7 │F8 │F9 │F10│F11│F12│DEL│
-     * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-     * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
-     * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-     * │   │   │   │   │   │   │←  │↓  │↑  │→  │   │   │   │   │
-     * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-     * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
-     * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-     * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
-     * └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
-     */
+/*
+  * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+  * │   │F1 │F2 │F3 │F4 │F5 │F6 │F7 │F8 │F9 │F10│F11│F12│DEL│
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │HOM│END│   │←  │↓  │↑  │→  │   │ ` │   │   │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │   │   │   │   │   │M4 │M5 │   │   │   │   │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
+  * └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+  */
 [1] = LAYOUT_all(
-    _______,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
-    _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-    _______,  _______,  _______,  KC_HOME,  KC_END,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
-    _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
-    _______,  _______,  _______,            _______,  _______,     _______,            _______,  _______,  _______,  _______,            _______
+ _______,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
+ _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+ _______,  _______,  _______,  KC_HOME,  KC_END,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
+ _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
+ _______,  _______,  _______,            _______,  _______,     _______,            _______,  _______,  _______,  _______,            _______
 ),
 
 [2] = LAYOUT_all(
-    _______, HUE_RED, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_VAD, RGB_VAI, _______,
+    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,   HUE_5,   HUE_6,   HUE_7,   HUE_8,   HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
     _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, _______, _______, _______, _______, _______, _______, QK_BOOT,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
@@ -88,23 +96,54 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 // Global variable to keep track of the current LED position
-static bool effect_enabled = true;
-static uint8_t current_led_position = 1;
-static uint32_t last_keypress_time = 0;
+static bool typing_cursor_effect_enabled = true;
+static uint8_t typing_cursor_current_position = 0;
+static uint32_t typing_cursor_last_keypress = 0;
+static bool typing_cursor_timeout_elapsed = true;
 #define LED_TIMEOUT 6000 // 6 seconds in milliseconds
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case HUE_RED:
-            if (record->event.pressed) {
-                // Set matrix hue to red
+
+    // Check hue changing keycodes
+    if (record->event.pressed) {
+        switch (keycode) {
+            case HUE_1: 
                 rgb_matrix_sethsv(0, 255, 255); // Hue 0 is red
-            }
-            return false;
+                return false;
+            case HUE_2: 
+                rgb_matrix_sethsv(25, 255, 255); // Hue 25
+                return false;
+            case HUE_3: 
+                rgb_matrix_sethsv(51, 255, 255); // Hue 51
+                return false;
+            case HUE_4: 
+                rgb_matrix_sethsv(76, 255, 255); // Hue 76
+                return false;
+            case HUE_5: 
+                rgb_matrix_sethsv(102, 255, 255); // Hue 102
+                return false;
+            case HUE_6: 
+                rgb_matrix_sethsv(127, 255, 255); // Hue 127
+                return false;
+            case HUE_7: 
+                rgb_matrix_sethsv(153, 255, 255); // Hue 153
+                return false;
+            case HUE_8: 
+                rgb_matrix_sethsv(178, 255, 255); // Hue 178
+                return false;
+            case HUE_9: 
+                rgb_matrix_sethsv(204, 255, 255); // Hue 204
+                return false;
+            case HUE_10: 
+                rgb_matrix_sethsv(229, 255, 255); // Hue 229
+                return false;
+        }
     }
+
+    
     if (record->event.pressed) {
         if (keycode == KC_C && layer_state_is(2)) {
-            effect_enabled = !effect_enabled;
+            typing_cursor_effect_enabled = !typing_cursor_effect_enabled;
             return false;
         }
 
@@ -118,43 +157,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             
             if (keycode == KC_BSPC) {
                 // Move the LED position backwards
-                if (current_led_position == 1) {
+                if (typing_cursor_current_position == 1) {
                     // do nothing
                 } else {
-                    current_led_position--;
+                    typing_cursor_current_position--;
                 }
             } else {
                 // Increment the LED position
-                current_led_position++;
-                if (current_led_position > 12) {
-                    current_led_position = 1;
+                typing_cursor_current_position++;
+                if (typing_cursor_current_position > 12) {
+                    typing_cursor_current_position = 1;
                 }
-                last_keypress_time = timer_read();
+                typing_cursor_last_keypress = timer_read();
+                typing_cursor_timeout_elapsed = false;
             }
             
         }
     }
     return true;
 }
-
-uint8_t get_current_hue(void) {
-    HSV hsv = rgb_matrix_get_hsv();
-    return hsv.h;
-}
-
-void set_hue(uint8_t hue) {
-    rgb_matrix_sethsv(hue, 255, 255);
-}
    
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (layer_state_is(2)) {
-        uint8_t current_hue = get_current_hue();
+        HSV current_hsv = rgb_matrix_get_hsv();
+        uint8_t current_hue = current_hsv.h;
         if (clockwise) {
-            current_hue = (current_hue + 1) % 256; // Increment hue, wrap around at 256
-        } else {
             current_hue = (current_hue - 1 + 256) % 256; // Decrement hue, wrap around at 0
+        } else {
+            current_hue = (current_hue + 1) % 256; // Increment hue, wrap around at 256
         }
-        set_hue(current_hue);
+        rgb_matrix_sethsv(current_hue, current_hsv.s, current_hsv.v);
     } else {
         if (clockwise) {
             tap_code16(C(A(KC_LEFT)));
@@ -178,13 +210,14 @@ void set_rgb_brightness(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t 
 // Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
 
-    if (effect_enabled) {
+    if (typing_cursor_effect_enabled && !typing_cursor_timeout_elapsed) {
         // Typing cursor lighting effect
-        if (timer_elapsed(last_keypress_time) < LED_TIMEOUT) {
-            rgb_matrix_set_color(current_led_position, 255, 255, 255);
+        if (timer_elapsed(typing_cursor_last_keypress) < LED_TIMEOUT) {
+            rgb_matrix_set_color(typing_cursor_current_position, 255, 255, 255);
         }
         else {
-            current_led_position = 1;
+            typing_cursor_current_position = 0;
+            typing_cursor_timeout_elapsed = true;
         }
     }
 
@@ -213,15 +246,14 @@ void matrix_scan_user(void) {
         }
     }
 
-     if (layer_state_is(2)) {
-        rgb_matrix_set_color(16, 0, 0, 0 ); // overwrite W key to off
+     if (layer_state_is(2)) { 
 
 
         rgb_matrix_set_color(11, 140, 140, 140 ); // minus key
         rgb_matrix_set_color(12, 255, 255, 255 ); // plus key
 
         // Typing cursor effect enabled indicator
-        if (effect_enabled) {
+        if (typing_cursor_effect_enabled) {
             rgb_matrix_set_color(44, 0, 255, 0 ); // Green
         } else {
             rgb_matrix_set_color(44, 255, 0, 0 ); // Red
