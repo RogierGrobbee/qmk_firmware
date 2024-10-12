@@ -20,6 +20,34 @@ enum custom_keycodes {
     HUE_10,
 };
 
+// create a static list with all the number indexes of the alpha keys.
+// So that means 15 is Q, 16 is W, 17 is E, etc.
+static const uint8_t alpha_keys[] = {
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 
+    29, 30, 31, 32, 33, 34, 35, 36, 37,
+    42, 43, 44, 45, 46, 47, 48
+};
+
+// do the same for number keys
+static const uint8_t number_keys[] = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+};
+
+// do the same for symbol keys
+static const uint8_t symbol_keys[] = {
+    11, 12, 25, 26, 27, 38, 39, 49, 50, 51
+};
+
+// do the same for modifier keys
+static const uint8_t modifier_keys[] = {
+    13, 14, 28, 41, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64
+};
+
+// esc, enter and space keys
+static const uint8_t other_keys[] = {
+   0, 40, 56, 57, 58, 59
+};
+
 // LED indexes
 /*
  *     ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
@@ -31,7 +59,7 @@ enum custom_keycodes {
  *     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
  *     │41 │42 │43 │44 │45 │46 │47 │48 │49 │50 │51 │   │52 │   │
  *     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
- *     │53 │54 │55 │   │56 │57 │   │   │58 │59 │60 │61 │   │62 │
+ *     │53 │54 │55 │   │56 │57 │   │58 │59 │60 │61 │62 │   │64 │
  *     └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
  */
 
@@ -79,11 +107,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [2] = LAYOUT_all(
-    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,   HUE_5,   HUE_6,   HUE_7,   HUE_8,   HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
-    _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD, _______, _______, _______, _______, _______, _______, QK_BOOT,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
-    _______, _______, _______,          _______, _______, _______,          _______, _______, _______, _______,            _______
+    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,   HUE_5,   HUE_6,   HUE_7,   HUE_8,    HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
+    _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
+    _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, RGB_SAD, RGB_SAI,            _______,
+    _______, _______, _______, _______, _______, _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
+    _______, _______, _______,          _______, _______, _______,          _______,  _______, _______, _______,            _______
 ),
 };
 
@@ -101,6 +129,9 @@ static uint8_t typing_cursor_current_position = 0;
 static uint32_t typing_cursor_last_keypress = 0;
 static bool typing_cursor_timeout_elapsed = true;
 #define LED_TIMEOUT 6000 // 6 seconds in milliseconds
+
+static bool colored_modifiers = false;
+
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
@@ -143,7 +174,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     
     if (record->event.pressed) {
         if (keycode == KC_C && layer_state_is(2)) {
+            // Toggle typing cursor effect
             typing_cursor_effect_enabled = !typing_cursor_effect_enabled;
+            return false;
+        }
+        if (keycode == KC_W && layer_state_is(2)) {
+            // Toggle colored modifiers
+            colored_modifiers = !colored_modifiers;
             return false;
         }
 
@@ -187,6 +224,12 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
             current_hue = (current_hue + 1) % 256; // Increment hue, wrap around at 256
         }
         rgb_matrix_sethsv(current_hue, current_hsv.s, current_hsv.v);
+    } else if (layer_state_is(1)) {
+        if (clockwise) {
+            tap_code(KC_VOLU); // Increase volume
+        } else {
+            tap_code(KC_VOLD); // Decrease volume
+        }
     } else {
         if (clockwise) {
             tap_code16(C(A(KC_LEFT)));
@@ -206,9 +249,98 @@ void set_rgb_brightness(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t 
 }
 
 
+void handle_layer_2_lighing(void) {
+    // Set hue buttons to their respective colors using HSV values
+    RGB rgb1 = hsv_to_rgb((HSV){0, 255, 255});
+    rgb_matrix_set_color(1, rgb1.r, rgb1.g, rgb1.b); // Red
+    RGB rgb2 = hsv_to_rgb((HSV){25, 255, 255});
+    rgb_matrix_set_color(2, rgb2.r, rgb2.g, rgb2.b); // Hue 25
+    RGB rgb3 = hsv_to_rgb((HSV){51, 255, 255});
+    rgb_matrix_set_color(3, rgb3.r, rgb3.g, rgb3.b); // Hue 51
+    RGB rgb4 = hsv_to_rgb((HSV){76, 255, 255});
+    rgb_matrix_set_color(4, rgb4.r, rgb4.g, rgb4.b); // Hue 76
+    RGB rgb5 = hsv_to_rgb((HSV){102, 255, 255});
+    rgb_matrix_set_color(5, rgb5.r, rgb5.g, rgb5.b); // Hue 102
+    RGB rgb6 = hsv_to_rgb((HSV){127, 255, 255});
+    rgb_matrix_set_color(6, rgb6.r, rgb6.g, rgb6.b); // Hue 127
+    RGB rgb7 = hsv_to_rgb((HSV){153, 255, 255});
+    rgb_matrix_set_color(7, rgb7.r, rgb7.g, rgb7.b); // Hue 153
+    RGB rgb8 = hsv_to_rgb((HSV){178, 255, 255});
+    rgb_matrix_set_color(8, rgb8.r, rgb8.g, rgb8.b); // Hue 178
+    RGB rgb9 = hsv_to_rgb((HSV){204, 255, 255});
+    rgb_matrix_set_color(9, rgb9.r, rgb9.g, rgb9.b); // Hue 204
+    RGB rgb10 = hsv_to_rgb((HSV){229, 255, 255});
+    rgb_matrix_set_color(10, rgb10.r, rgb10.g, rgb10.b); // Hue 229
+
+    // Set colors for brightness keys
+    rgb_matrix_set_color(11, 111, 111, 111 ); // minus key
+    rgb_matrix_set_color(12, 255, 255, 255 ); // plus key
+
+    // Set colors for speed keys. Blinking slow and fast.
+    if (timer_read() % 1000 < 800) { // Slow key. on for 800ms, off for 200ms
+        rgb_matrix_set_color(25, 0, 255, 255 );
+    } else {
+        rgb_matrix_set_color(25, 0, 0, 0 );
+    }
+    if (timer_read() % 400 < 200) { // Fast key. on for 200ms, off for 200ms
+        rgb_matrix_set_color(26, 255, 0, 0 ); 
+    } else {
+        rgb_matrix_set_color(26, 0, 0, 0 );
+    }
+
+    //make the boot key blue
+    rgb_matrix_set_color(27, 0, 0, 255 ); // Boot key
+
+    // Set colors for saturation keys
+    rgb_matrix_set_color(38, 176, 255, 176); // Low saturation key (whiteish green)
+    rgb_matrix_set_color(39, 0, 255, 0);     // Full saturation key (green)
+
+    // Set colors for mode change buttons
+    rgb_matrix_set_color(49, 0, 0, 255);
+    rgb_matrix_set_color(50, 0, 0, 255);
+
+
+    // Typing cursor effect enabled indicator
+    if (typing_cursor_effect_enabled) {
+        rgb_matrix_set_color(44, 0, 255, 0 ); // Green
+    } else {
+        rgb_matrix_set_color(44, 255, 0, 0 ); // Red
+    }
+
+    // Colored modifiers enabled indicator
+    if (colored_modifiers) {
+        rgb_matrix_set_color(16, 0, 255, 0 ); // Green
+    } else {
+        rgb_matrix_set_color(16, 255, 0, 0 ); // Red
+    }
+
+}
+
+void apply_modifier_colors(void) {
+    if (colored_modifiers) {
+        // Set the modifier keys to green
+        for (int i = 0; i < sizeof(modifier_keys); i++) {
+            rgb_matrix_set_color(modifier_keys[i], 0, 255, 108);
+        }
+        for (int i = 0; i < sizeof(other_keys); i++) {
+            rgb_matrix_set_color(other_keys[i], 0, 255, 108);
+        }
+
+        rgb_matrix_set_color(61, 255, 42, 0);
+        rgb_matrix_set_color(62, 255, 42, 0);
+        
+    } 
+}
+
 // Function gets called every tick of the lighting engine 
 // Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
+
+    if (layer_state_is(0)) {
+        apply_modifier_colors();
+    }
+
+
 
     if (typing_cursor_effect_enabled && !typing_cursor_timeout_elapsed) {
         // Typing cursor lighting effect
@@ -223,6 +355,13 @@ void matrix_scan_user(void) {
 
     // Check if layer 1 is active
     if (layer_state_is(1)) {
+        // turn off all the keys
+        for (int i = 0; i < 64; i++) {
+            rgb_matrix_set_color(i, 0, 0, 0);
+        }
+
+        apply_modifier_colors();
+
         // Set arrow keys to red
         rgb_matrix_set_color(34, 0, 255, 110 ); // Left arrow key
         rgb_matrix_set_color(35, 0, 255, 110 ); // Down arrow key
@@ -247,20 +386,11 @@ void matrix_scan_user(void) {
     }
 
      if (layer_state_is(2)) { 
-
-
-        rgb_matrix_set_color(11, 140, 140, 140 ); // minus key
-        rgb_matrix_set_color(12, 255, 255, 255 ); // plus key
-
-        // Typing cursor effect enabled indicator
-        if (typing_cursor_effect_enabled) {
-            rgb_matrix_set_color(44, 0, 255, 0 ); // Green
-        } else {
-            rgb_matrix_set_color(44, 255, 0, 0 ); // Red
-        }
-
-
+        handle_layer_2_lighing();
      }
 }
+
+
+
 
 
