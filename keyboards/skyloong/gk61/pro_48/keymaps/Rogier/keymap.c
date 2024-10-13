@@ -18,6 +18,7 @@ enum custom_keycodes {
     HUE_8,
     HUE_9,
     HUE_10,
+    LIGHT_GAME
 };
 
 // create a static list with all the number indexes of the alpha keys.
@@ -30,7 +31,7 @@ static const uint8_t alpha_keys[] = {
 
 // do the same for number keys
 static const uint8_t number_keys[] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 };
 
 // do the same for symbol keys
@@ -74,7 +75,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
      * │Sft│ Z │ X │ C │ V │ B │ N │ M │ , │ . │ / │   |Sft|   │
      * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-     * │Ctl│GUI│Alt│   │Spc│Mut│   │   |MO1|Alt│App│Ctl│   │Mo2|
+     * │Ctl│GUI│Alt│   │Spc│Mut│   │   |MO1|LK1│App│Ctl│   │Mo2|
      * └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
      */
     [0] = LAYOUT_all(
@@ -82,7 +83,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
          KC_TAB,     KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,        KC_Y,     KC_U,       KC_I,     KC_O,        KC_P,     KC_LBRC,  KC_RBRC,   KC_BSLS,
         KC_LCTL,     KC_A,     KC_S,     KC_D,     KC_F,     KC_G,        KC_H,     KC_J,       KC_K,     KC_L,     KC_SCLN,     KC_QUOT,              KC_ENT,
         KC_LSFT,     KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,        KC_N,     KC_M,    KC_COMM,   KC_DOT,     KC_SLSH,               KC_RSFT,
-        KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),  KC_RALT,      LGUI(KC_LEFT),   LGUI(KC_RIGHT),     MO(2)
+        KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),    MO(3),      LGUI(KC_LEFT),   LGUI(KC_RIGHT),     MO(2)
     ),
 
 /*
@@ -113,7 +114,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, _______, _______, _______, _______, _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
     _______, _______, _______,          _______, _______, _______,          _______,  _______, _______, _______,            _______
 ),
+[3] = LAYOUT_all(
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+    _______, _______, _______, _______, LIGHT_GAME, _______, _______, _______, _______, _______, _______, _______,          _______,
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
+    _______, _______, _______,          _______, _______, _______,          TG(1),   _______, _______, _______,          _______
+)
+
+
+// [4] = LAYOUT_all(
+//     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+//     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+//     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
+//     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
+//     _______, _______, _______,          _______, _______, _______,          _______, _______, _______, _______,          _______
+// )
 };
+
+
+
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
@@ -131,6 +151,14 @@ static bool typing_cursor_timeout_elapsed = true;
 #define LED_TIMEOUT 6000 // 6 seconds in milliseconds
 
 static bool colored_modifiers = false;
+
+// Variables for Game: Stop the light!
+bool game_running = false;
+uint16_t game_timer;
+uint8_t light_position = 0;
+const uint8_t light_positions[] = {29 ,30 ,31 ,32 ,33 ,34,35};
+bool moving_right = true;
+uint8_t game_level = 1;
 
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -168,6 +196,35 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             case HUE_10: 
                 rgb_matrix_sethsv(229, 255, 255); // Hue 229
                 return false;
+            case LIGHT_GAME:
+                game_running = true;
+                game_timer = timer_read();
+                light_position = 0;
+                return false;
+            case KC_SPC:
+                if (game_running) {
+                    
+                    if (light_positions[light_position] == 32) {
+                        // User stopped the light on F
+                        // Provide positive feedback (e.g., turn on a green LED)
+                        game_level++;
+                        light_position = 0;
+                        moving_right = true;
+                        if (game_level > 9) {
+                            // User won the game
+                            game_running = false;
+                            game_level = 1;
+                        }
+                    } else {
+                        // User missed
+                        // Provide negative feedback (e.g., turn on a red LED)
+                        light_position = 0;
+                        moving_right = true;
+                        game_running = false;
+                    }
+                    return false;
+                }
+                return true;
         }
     }
 
@@ -226,9 +283,9 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         rgb_matrix_sethsv(current_hue, current_hsv.s, current_hsv.v);
     } else if (layer_state_is(1)) {
         if (clockwise) {
-            tap_code(KC_VOLU); // Increase volume
-        } else {
             tap_code(KC_VOLD); // Decrease volume
+        } else {
+            tap_code(KC_VOLU); // Increase volume
         }
     } else {
         if (clockwise) {
@@ -318,12 +375,18 @@ void handle_layer_2_lighing(void) {
 
 void apply_modifier_colors(void) {
     if (colored_modifiers) {
+
+        // make number keys orange
+        for (int i = 0; i < sizeof(number_keys); i++) {
+            rgb_matrix_set_color(number_keys[i], 255, 42, 0);
+        }
+
         // Set the modifier keys to green
         for (int i = 0; i < sizeof(modifier_keys); i++) {
-            rgb_matrix_set_color(modifier_keys[i], 0, 255, 108);
+            rgb_matrix_set_color(modifier_keys[i], 0, 255, 90);
         }
         for (int i = 0; i < sizeof(other_keys); i++) {
-            rgb_matrix_set_color(other_keys[i], 0, 255, 108);
+            rgb_matrix_set_color(other_keys[i], 0, 255, 90);
         }
 
         rgb_matrix_set_color(61, 255, 42, 0);
@@ -340,6 +403,49 @@ void matrix_scan_user(void) {
         apply_modifier_colors();
     }
 
+
+    if (game_running) {
+        // turn off all the keys
+        for (int i = 0; i < 64; i++) {
+            rgb_matrix_set_color(i, 0, 0, 0);
+        }
+
+        //make the path of the light white with low brightness
+        for (int i = 0; i < sizeof(light_positions); i++) {
+            // make the center key green with low brightness
+            if (light_positions[i] == 32) {
+                set_rgb_brightness(light_positions[i], 0, 255, 0, 50);
+            } else {
+                set_rgb_brightness(light_positions[i], 255, 255, 255, 50);
+            }
+        }
+
+        int speed = 100 - (game_level * 7); 
+        if (timer_elapsed(game_timer) > speed) { // Move light every 100ms
+            game_timer = timer_read();
+            
+            // Update the light position based on the direction
+            if (moving_right) {
+                light_position++;
+                if (light_position >= (sizeof(light_positions) - 1)) {
+                    moving_right = false; // Reverse direction
+                }
+            } else {
+                light_position--;
+                if (light_position <= 0) {
+                    moving_right = true; // Reverse direction
+                }
+            }
+        }
+        
+        // update the moving light
+        rgb_matrix_set_color(light_positions[light_position], 255, 0, 0);
+       
+        // light up the level indicator
+        rgb_matrix_set_color(game_level, 0, 255, 0);
+        
+        return;
+    }
 
 
     if (typing_cursor_effect_enabled && !typing_cursor_timeout_elapsed) {
@@ -383,6 +489,8 @@ void matrix_scan_user(void) {
         for (int i = 1; i < 13; i++) {
             rgb_matrix_set_color(i, 0, 128, 255 );
         }
+
+    
     }
 
      if (layer_state_is(2)) { 
