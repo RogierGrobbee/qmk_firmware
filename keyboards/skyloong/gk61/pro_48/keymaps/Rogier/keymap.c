@@ -83,7 +83,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
          KC_TAB,     KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,        KC_Y,     KC_U,       KC_I,     KC_O,        KC_P,     KC_LBRC,  KC_RBRC,   KC_BSLS,
         KC_LCTL,     KC_A,     KC_S,     KC_D,     KC_F,     KC_G,        KC_H,     KC_J,       KC_K,     KC_L,     KC_SCLN,     KC_QUOT,              KC_ENT,
         KC_LSFT,     KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,        KC_N,     KC_M,    KC_COMM,   KC_DOT,     KC_SLSH,               KC_RSFT,
-        KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),    MO(3),      LGUI(KC_LEFT),   LGUI(KC_RIGHT),     MO(2)
+        KC_LCTL,  KC_LGUI,  KC_LALT,             KC_SPC,   KC_SPC,     KC_MUTE,               MO(1),    KC_RALT,   LGUI(KC_LEFT),   LGUI(KC_RIGHT),     MO(2)
     ),
 
 /*
@@ -108,20 +108,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [2] = LAYOUT_all(
-    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,   HUE_5,   HUE_6,   HUE_7,   HUE_8,    HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, RGB_SAD, RGB_SAI,            _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
-    _______, _______, _______,          _______, _______, _______,          _______,  _______, _______, _______,            _______
+    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,      HUE_5,   HUE_6,   HUE_7,   HUE_8,    HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
+    _______, _______, _______, _______, _______,    _______, _______, _______, _______,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
+    _______, _______, _______, _______, LIGHT_GAME, _______, _______, _______, _______,  _______, RGB_SAD, RGB_SAI,            _______,
+    _______, _______, _______, _______, _______,    _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
+    _______, _______, _______,          _______,    _______, _______,          TG(1),    _______, _______, _______,            _______
 ),
-[3] = LAYOUT_all(
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-    _______, _______, _______, _______, LIGHT_GAME, _______, _______, _______, _______, _______, _______, _______,          _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
-    _______, _______, _______,          _______, _______, _______,          TG(1),   _______, _______, _______,          _______
-)
-
 
 // [4] = LAYOUT_all(
 //     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
@@ -371,6 +363,9 @@ void handle_layer_2_lighing(void) {
         rgb_matrix_set_color(16, 255, 0, 0 ); // Red
     }
 
+    // set color for start game key
+    rgb_matrix_set_color(32, 255, 0, 0); // Red
+
 }
 
 void apply_modifier_colors(void) {
@@ -423,7 +418,7 @@ void matrix_scan_user(void) {
         int speed = 100 - (game_level * 7); 
         if (timer_elapsed(game_timer) > speed) { // Move light every 100ms
             game_timer = timer_read();
-            
+             
             // Update the light position based on the direction
             if (moving_right) {
                 light_position++;
@@ -489,7 +484,7 @@ void matrix_scan_user(void) {
         for (int i = 1; i < 13; i++) {
             rgb_matrix_set_color(i, 0, 128, 255 );
         }
-
+        
     
     }
 
