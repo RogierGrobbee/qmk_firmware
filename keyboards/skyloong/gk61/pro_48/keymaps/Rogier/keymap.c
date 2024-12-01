@@ -151,6 +151,11 @@ uint8_t light_position = 0;
 const uint8_t light_positions[] = {29 ,30 ,31 ,32 ,33 ,34,35};
 bool moving_right = true;
 uint8_t game_level = 1;
+bool light_stopped = false;
+uint32_t stop_timer = 0;
+bool blink_state = false;
+uint32_t blink_timer = 0;
+bool positive_feedback = false;
 
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -192,6 +197,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 game_running = true;
                 game_timer = timer_read();
                 light_position = 0;
+                moving_right = true;
                 return false;
             case KC_SPC:
                 if (game_running) {
@@ -200,20 +206,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                         // User stopped the light on F
                         // Provide positive feedback (e.g., turn on a green LED)
                         game_level++;
-                        light_position = 0;
-                        moving_right = true;
+                        light_stopped = true;
+                        stop_timer = timer_read();
+                        positive_feedback = true;
                         if (game_level > 9) {
                             // User won the game
-                            game_running = false;
                             game_level = 1;
                         }
                     } else {
                         // User missed
                         // Provide negative feedback (e.g., turn on a red LED)
-                        light_position = 0;
-                        moving_right = true;
-                        game_running = false;
+                        light_stopped = true;
+                        stop_timer = timer_read();
+                        positive_feedback = false;
                     }
+                    return false;
+                }
+                return true;
+            case KC_ESC:
+                if (game_running) {
+                    game_running = false;
                     return false;
                 }
                 return true;
@@ -415,29 +427,54 @@ void matrix_scan_user(void) {
             }
         }
 
-        int speed = 100 - (game_level * 7); 
-        if (timer_elapsed(game_timer) > speed) { // Move light every 100ms
-            game_timer = timer_read();
-             
-            // Update the light position based on the direction
-            if (moving_right) {
-                light_position++;
-                if (light_position >= (sizeof(light_positions) - 1)) {
-                    moving_right = false; // Reverse direction
+
+        // Handle the blinking effect when the light is stopped
+        if (light_stopped) {
+            if (timer_elapsed(stop_timer) < 2000) { // Stop for 2 seconds
+                if (timer_elapsed(blink_timer) > 250) { // Blink every 250ms
+                    blink_state = !blink_state;
+                    blink_timer = timer_read();
+                }
+                if (blink_state) {
+                    if (positive_feedback) {
+                        rgb_matrix_set_color(light_positions[light_position], 0, 255, 0); // Green color
+                    } else {
+                        rgb_matrix_set_color(light_positions[light_position], 255, 0, 0); // Red color
+                    }
+                } else {
+                    rgb_matrix_set_color(light_positions[light_position], 0, 0, 0); // Turn off
                 }
             } else {
-                light_position--;
-                if (light_position <= 0) {
-                    moving_right = true; // Reverse direction
-                }
+                light_position = 0;
+                moving_right = true;
+                light_stopped = false;
             }
         }
-        
-        // update the moving light
-        rgb_matrix_set_color(light_positions[light_position], 255, 0, 0);
-       
+        else {
+            int speed = 100 - (game_level * 7); 
+            if (timer_elapsed(game_timer) > speed) { // Move light every 100ms
+                game_timer = timer_read();
+
+                // Update the light position based on the direction
+                if (moving_right) {
+                    light_position++;
+                    if (light_position >= (sizeof(light_positions) - 1)) {
+                        moving_right = false; // Reverse direction
+                    }
+                } else {
+                    light_position--;
+                    if (light_position <= 0) {
+                        moving_right = true; // Reverse direction
+                    }
+                }
+            }
+
+            // update the moving light
+            rgb_matrix_set_color(light_positions[light_position], 255, 0, 0);
+        }
+
         // light up the level indicator
-        rgb_matrix_set_color(game_level, 0, 255, 0);
+        rgb_matrix_set_color(game_level, 0, 255, 255);
         
         return;
     }
