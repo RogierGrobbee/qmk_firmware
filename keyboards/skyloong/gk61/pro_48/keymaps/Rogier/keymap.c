@@ -18,7 +18,7 @@ enum custom_keycodes {
     HUE_8,
     HUE_9,
     HUE_10,
-    LIGHT_GAME
+    LIGHT_GAME,
 };
 
 // create a static list with all the number indexes of the alpha keys.
@@ -112,7 +112,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, _______, _______, _______, _______,    _______, _______, _______, _______,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
     _______, _______, _______, _______, LIGHT_GAME, _______, _______, _______, _______,  _______, RGB_SAD, RGB_SAI,            _______,
     _______, _______, _______, _______, _______,    _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
-    _______, _______, _______,          _______,    _______, _______,          TG(1),    _______, _______, _______,            _______
+    _______, _______, _______,          _______,    _______, _______,          TG(1),    DM_PLY1, DM_REC1,  DM_RSTP,             _______
 ),
 
 // [4] = LAYOUT_all(
@@ -272,6 +272,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             
         }
     }
+
+
     return true;
 }
    
@@ -378,6 +380,11 @@ void handle_layer_2_lighing(void) {
     // set color for start game key
     rgb_matrix_set_color(32, 255, 0, 0); // Red
 
+
+    // Set colors for macro recording and playback keys
+    rgb_matrix_set_color(62, 0, 255, 255); // Light blue
+    rgb_matrix_set_color(61, 255, 0, 0); // Red
+    rgb_matrix_set_color(60, 0, 255, 0); // green
 }
 
 void apply_modifier_colors(void) {
@@ -512,7 +519,7 @@ void matrix_scan_user(void) {
 
         rgb_matrix_set_color(39, 255, 0, 255 ); // Grv key
 
-        rgb_matrix_set_color(13, 255, 77, 0 ); // Del key
+        rgb_matrix_set_color(13, 255, 42, 0 ); // Del key
 
         rgb_matrix_set_color(49, 255, 255, 0 ); // Desktop Left key
         rgb_matrix_set_color(50, 255, 255, 0 ); // Desktop Right key
