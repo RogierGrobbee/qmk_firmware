@@ -6,7 +6,6 @@
 
 #include QMK_KEYBOARD_H
 
-
 enum custom_keycodes {
     HUE_1 = SAFE_RANGE,
     HUE_2,
@@ -19,6 +18,7 @@ enum custom_keycodes {
     HUE_9,
     HUE_10,
     LIGHT_GAME,
+    NI_TOG,
 };
 
 // create a static list with all the number indexes of the alpha keys.
@@ -101,18 +101,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   */
 [1] = LAYOUT_all(
  _______,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
- _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
- _______,  _______,  _______,  KC_HOME,  KC_END,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
- _______,  _______,  _______,  _______,  _______,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
- _______,  _______,  _______,            _______,  _______,     _______,            _______,  _______,  _______,  _______,            _______
+ _______,  MS_BTN2,  MS_UP,    MS_BTN1,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+ _______,  MS_LEFT,  MS_DOWN,  MS_RGHT,  _______,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
+ _______,  _______,  _______,  KC_HOME,  KC_END,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
+ _______,  _______,  _______,            _______,  _______,     _______,            _______,  QK_LOCK,  DM_PLY1,  DM_PLY2,            _______
 ),
 
 [2] = LAYOUT_all(
     _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,      HUE_5,   HUE_6,   HUE_7,   HUE_8,    HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
-    _______, _______, _______, _______, _______,    _______, _______, _______, _______,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
+    _______, _______, _______, _______, _______,    _______, _______, _______, NI_TOG,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
     _______, _______, _______, _______, LIGHT_GAME, _______, _______, _______, _______,  _______, RGB_SAD, RGB_SAI,            _______,
     _______, _______, _______, _______, _______,    _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
-    _______, _______, _______,          _______,    _______, _______,          TG(1),    DM_PLY1, DM_REC1,  DM_RSTP,             _______
+    _______, _______, _______,          _______,    _______, _______,          TG(1),    DM_RSTP, DM_REC1,  DM_REC2,             _______
 ),
 
 // [4] = LAYOUT_all(
@@ -134,6 +134,20 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [2] = { ENCODER_CCW_CW(RGB_HUD, RGB_HUI) }
 };
 #endif
+
+uint32_t last_mouse_move = 0;
+void move_mouse_left_right(void) {
+    static int8_t direction = 1;
+    if (direction == 1) {
+        register_code(MS_RGHT);
+        unregister_code(MS_RGHT);
+    } else {
+        register_code(MS_LEFT);
+        unregister_code(MS_LEFT);
+    }
+    direction = -direction; // Change direction
+}
+
 
 // Global variable to keep track of the current LED position
 static bool typing_cursor_effect_enabled = true;
@@ -157,11 +171,14 @@ bool blink_state = false;
 uint32_t blink_timer = 0;
 bool positive_feedback = false;
 
+bool ni_active = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     // Check hue changing keycodes
     if (record->event.pressed) {
+        ni_active = false;
+
         switch (keycode) {
             case HUE_1: 
                 rgb_matrix_sethsv(0, 255, 255); // Hue 0 is red
@@ -229,6 +246,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     return false;
                 }
                 return true;
+
+            case NI_TOG:
+                // while no idle is active, make random mouse movements
+                last_mouse_move = timer_read();
+                ni_active = true;
+
+                return false;
         }
     }
 
@@ -276,7 +300,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     return true;
 }
-   
+
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (layer_state_is(2)) {
         HSV current_hsv = rgb_matrix_get_hsv();
@@ -351,6 +375,10 @@ void handle_layer_2_lighing(void) {
         rgb_matrix_set_color(26, 0, 0, 0 );
     }
 
+    // NI 
+    rgb_matrix_set_color(22, 255, 0, 0 ); // Red
+
+
     //make the boot key blue
     rgb_matrix_set_color(27, 0, 0, 255 ); // Boot key
 
@@ -382,9 +410,9 @@ void handle_layer_2_lighing(void) {
 
 
     // Set colors for macro recording and playback keys
-    rgb_matrix_set_color(62, 0, 255, 255); // Light blue
-    rgb_matrix_set_color(61, 255, 0, 0); // Red
-    rgb_matrix_set_color(60, 0, 255, 0); // green
+    rgb_matrix_set_color(62, 0, 255, 0); // green record 2
+    rgb_matrix_set_color(61, 255, 0, 0); // Red  record 1
+    rgb_matrix_set_color(60, 0, 255, 255); // Light blue end recording
 }
 
 void apply_modifier_colors(void) {
@@ -413,10 +441,21 @@ void apply_modifier_colors(void) {
 // Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
 
+    if (ni_active) {
+        if (timer_elapsed(last_mouse_move) > 5000) { // 5 seconds delay
+            move_mouse_left_right();
+            last_mouse_move = timer_read(); // Reset the timer
+        }
+        if (timer_read() % 1000 < 800) {
+            rgb_matrix_set_color(57, 98, 0, 255 ); 
+        } else {
+            rgb_matrix_set_color(57, 0, 0, 0 );
+        }
+    }
+
     if (layer_state_is(0)) {
         apply_modifier_colors();
     }
-
 
     if (game_running) {
         // turn off all the keys
@@ -513,9 +552,19 @@ void matrix_scan_user(void) {
         rgb_matrix_set_color(36, 0, 255, 110 ); // Up arrow key
         rgb_matrix_set_color(37, 0, 255, 110 ); // Right arrow key
 
+        // mouse left right click
+        rgb_matrix_set_color(15, 255, 42, 0 );
+        rgb_matrix_set_color(17, 255, 42, 0 );
+
+        // Color mouse move keys
+        rgb_matrix_set_color(16, 98, 0, 255 ); 
+        rgb_matrix_set_color(29, 98, 0, 255  ); 
+        rgb_matrix_set_color(30, 98, 0, 255  ); 
+        rgb_matrix_set_color(31, 98, 0, 255  ); 
+
         // Color Home and End keys
-        rgb_matrix_set_color(31, 255, 0, 0 ); 
-        rgb_matrix_set_color(32, 255, 0, 0  ); 
+        rgb_matrix_set_color(44, 255, 0, 0 ); 
+        rgb_matrix_set_color(45, 255, 0, 0  ); 
 
         rgb_matrix_set_color(39, 255, 0, 255 ); // Grv key
 
@@ -529,6 +578,10 @@ void matrix_scan_user(void) {
             rgb_matrix_set_color(i, 0, 128, 255 );
         }
         
+        // Set colors for macro recording and playback keys
+        rgb_matrix_set_color(62, 0, 255, 0); // green play 2
+        rgb_matrix_set_color(61, 255, 0, 0); // Red play 1
+        rgb_matrix_set_color(60, 0, 255, 255); // Light blue QK_LOCK
     
     }
 
