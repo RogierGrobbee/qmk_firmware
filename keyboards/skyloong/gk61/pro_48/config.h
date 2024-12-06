@@ -10,5 +10,6 @@
 #define WIN_MOD_INDEX 16
 #define MAC_MOD_INDEX 17
 #define TAPPING_TOGGLE 2
+#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 
 #define g_suspend_state rgb_matrix_get_suspend_state()

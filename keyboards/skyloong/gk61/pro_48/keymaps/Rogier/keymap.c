@@ -19,6 +19,7 @@ enum custom_keycodes {
     HUE_10,
     LIGHT_GAME,
     NI_TOG,
+    AUTO_CLICK,
 };
 
 // create a static list with all the number indexes of the alpha keys.
@@ -90,13 +91,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
   * │   │F1 │F2 │F3 │F4 │F5 │F6 │F7 │F8 │F9 │F10│F11│F12│DEL│
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-  * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
+  * │   │MB2│MU │MB1│   │   │   │   │   │   │   │   │   │   │
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-  * │   │   │   │HOM│END│   │←  │↓  │↑  │→  │   │ ` │   │   │
+  * │   │ML │MD │MR │   │   │←  │↓  │↑  │→  │   │ ` │   │   │
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-  * │   │   │   │   │   │   │   │   │M4 │M5 │   │   │   │   │
+  * │   │   │   │HOM│END│   │   │   │M4 │M5 │   │   │   │   │
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-  * │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
+  * │   │   │   │   │   │   │   │   │   │LCK│PM1│PM2│   │   │
   * └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
   */
 [1] = LAYOUT_all(
@@ -107,9 +108,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  _______,  _______,  _______,            _______,  _______,     _______,            _______,  QK_LOCK,  DM_PLY1,  DM_PLY2,            _______
 ),
 
+/*
+  * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+  * │   │H1 │H2 │H3 │H4 │H5 │H6 │H7 │H8 │H9 │H10│VAD│VAI│   │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │CLK│   │   │   │   │NI │   │   │SPD│SPI│BT │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │   │GME│   │   │   │   │   │SAD│SAI│   │   │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │   │   │   │   │   │RM │MOD│   │   │   │   │
+  * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
+  * │   │   │   │   │   │   │   │   │TG1│RST│R1 │R2 │   │   │
+  * └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+  */
 [2] = LAYOUT_all(
-    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,      HUE_5,   HUE_6,   HUE_7,   HUE_8,    HUE_9,   HUE_10,  RGB_VAD, RGB_VAI, _______,
-    _______, _______, _______, _______, _______,    _______, _______, _______, NI_TOG,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
+    _______, HUE_1,   HUE_2,   HUE_3,   HUE_4,      HUE_5,   HUE_6,   HUE_7,   HUE_8,    HUE_9,   HUE_10, RGB_VAD, RGB_VAI, _______,
+    _______, _______, _______, AUTO_CLICK, _______, _______, _______, _______, NI_TOG,  _______, _______, RGB_SPD, RGB_SPI, QK_BOOT,
     _______, _______, _______, _______, LIGHT_GAME, _______, _______, _______, _______,  _______, RGB_SAD, RGB_SAI,            _______,
     _______, _______, _______, _______, _______,    _______, _______, _______, RGB_RMOD, RGB_MOD, _______,            _______,
     _______, _______, _______,          _______,    _______, _______,          TG(1),    DM_RSTP, DM_REC1,  DM_REC2,             _______
@@ -123,7 +137,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     _______, _______, _______,          _______, _______, _______,          _______, _______, _______, _______,          _______
 // )
 };
-
 
 
 
@@ -172,6 +185,7 @@ uint32_t blink_timer = 0;
 bool positive_feedback = false;
 
 bool ni_active = false;
+bool auto_click_active = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
@@ -251,7 +265,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 // while no idle is active, make random mouse movements
                 last_mouse_move = timer_read();
                 ni_active = true;
-
+                return false;
+            case AUTO_CLICK:
+                auto_click_active = !auto_click_active;
                 return false;
         }
     }
@@ -405,6 +421,13 @@ void handle_layer_2_lighing(void) {
         rgb_matrix_set_color(16, 255, 0, 0 ); // Red
     }
 
+    // Set color for auto click key
+    if (auto_click_active) {
+        rgb_matrix_set_color(17, 0, 255, 0); // Green
+    } else {
+        rgb_matrix_set_color(17, 255, 0, 0); // Red
+    }
+
     // set color for start game key
     rgb_matrix_set_color(32, 255, 0, 0); // Red
 
@@ -441,6 +464,10 @@ void apply_modifier_colors(void) {
 // Do all lighting changes here because if you do it in process_record_user, it will be overwritten immediately by the global lighting effect (if a global lighting effect is active).
 void matrix_scan_user(void) {
 
+    if (layer_state_is(0)) {
+        apply_modifier_colors();
+    }
+
     if (ni_active) {
         if (timer_elapsed(last_mouse_move) > 5000) { // 5 seconds delay
             move_mouse_left_right();
@@ -453,8 +480,8 @@ void matrix_scan_user(void) {
         }
     }
 
-    if (layer_state_is(0)) {
-        apply_modifier_colors();
+    if (auto_click_active) {
+        tap_code(MS_BTN1);
     }
 
     if (game_running) {
