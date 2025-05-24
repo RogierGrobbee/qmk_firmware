@@ -91,9 +91,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
   * │   │F1 │F2 │F3 │F4 │F5 │F6 │F7 │F8 │F9 │F10│F11│F12│DEL│
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-  * │   │MB2│MU │MB1│   │   │   │   │   │   │   │   │   │   │
+  * │   │MB2│MU │MB1│MWU│   │   │   │   │   │   │   │   │   │
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-  * │   │ML │MD │MR │   │   │←  │↓  │↑  │→  │   │ ` │   │   │
+  * │   │ML │MD │MR │MWD│   │←  │↓  │↑  │→  │   │ ` │   │   │
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
   * │   │   │   │HOM│END│   │   │   │M4 │M5 │   │   │   │   │
   * ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
@@ -102,8 +102,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   */
 [1] = LAYOUT_all(
  _______,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,       KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,
- _______,  MS_BTN2,  MS_UP,    MS_BTN1,  _______,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
- _______,  MS_LEFT,  MS_DOWN,  MS_RGHT,  _______,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
+ _______,  MS_BTN2,  MS_UP,    MS_BTN1,  MS_WHLU,  _______,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+ _______,  MS_LEFT,  MS_DOWN,  MS_RGHT,  MS_WHLD,   _______,     KC_LEFT,  KC_DOWN,  KC_UP,    KC_RIGHT, _______,  KC_GRV,             _______,
  _______,  _______,  _______,  KC_HOME,  KC_END,  _______,     _______,  _______,  KC_BTN4,  KC_BTN5,  _______,            _______,
  _______,  _______,  _______,            _______,  _______,     _______,            _______,  QK_LOCK,  DM_PLY1,  DM_PLY2,            _______
 ),
@@ -590,6 +590,10 @@ void matrix_scan_user(void) {
         rgb_matrix_set_color(29, 98, 0, 255  ); 
         rgb_matrix_set_color(30, 98, 0, 255  ); 
         rgb_matrix_set_color(31, 98, 0, 255  ); 
+
+        // Set scroll keys rto green
+        rgb_matrix_set_color(18, 0, 255, 0 ); // Scroll up
+        rgb_matrix_set_color(32, 0, 255, 0 ); // Scroll down
 
         // Color Home and End keys
         rgb_matrix_set_color(44, 255, 0, 0 ); 
